@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %} - Flaskr</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <h1>Flaskr</h1>
+    <ul>
+      {% if g.user %}
+        <li><span>{{ g.user['username'] }}</span></li>
+        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+      {% else %}
+        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+        <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <!-- New Section with Button -->
+  <section class="new-section">
+    <h2>NEW BLOCK</h2>
+    <!-- Button to fetch API data -->
+    <button id="fetch-button">Fetch API Data</button>
+    <!-- Div to display API results -->
+    <div id="api-results" style="display:inline-block; margin-left: 20px;"></div>
+  </section>
+
+  <section class="content">
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </section>
+
+  <!-- JavaScript to handle button click and fetch data from the server -->
+  <script>
+    document.getElementById('fetch-button').addEventListener('click', function() {
+      // Make a GET request to the /fetch_summary endpoint
+      fetch('/fetch_summary')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          return response.json(); // Parse the JSON response
+        })
+        .then(data => {
+          // Display the fetched data in the #api-results div
+          document.getElementById('api-results').innerHTML = data.summary;
+        })
+        .catch(error => {
+          // Display an error message if the request fails
+          document.getElementById('api-results').innerHTML = 'Error fetching data.';
+          console.error('Error:', error);
+        });
+    });
+  </script>
+</body>
+</html>
